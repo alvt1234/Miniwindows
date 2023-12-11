@@ -81,16 +81,26 @@ public class VisorImagen extends JFrame {
         add(imagePanel, BorderLayout.CENTER);
         add(buttonPanel, BorderLayout.SOUTH);
     }
+ private static class CarpetaVaciaException extends RuntimeException {
+        public CarpetaVaciaException(String message) {
+            super(message);
+        }
+    }
 
     private void seleccionarCarpeta() {
-        JFileChooser chooser = new JFileChooser();
+         JFileChooser chooser = new JFileChooser();
         chooser.setCurrentDirectory(new File(System.getProperty("user.home")));
-        chooser.setDialogTitle("Seleccionar Carpeta de Imágenes");
+        chooser.setDialogTitle("Seleccionar Carpeta de Imagenes");
         chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 
         if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
             String folderPath = chooser.getSelectedFile().getAbsolutePath();
             imagePaths = loadImages(folderPath);
+
+            if (imagePaths.isEmpty()) {
+                throw new CarpetaVaciaException("La carpeta no contiene imágenes.");
+            }
+
             currentIndex = 0;
             updateImages();
         }
@@ -177,6 +187,8 @@ public class VisorImagen extends JFrame {
         Image image = icon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
         return new ImageIcon(image);
     }
+    
+    
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(new Runnable() {

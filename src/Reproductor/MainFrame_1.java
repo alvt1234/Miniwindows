@@ -326,18 +326,38 @@ public class MainFrame_1 extends javax.swing.JFrame {
         
         JFileChooser openFileChooser = new JFileChooser(currentDirectory);
         
-        openFileChooser.setFileFilter(new FileTypeFilter(".mp3", "Solo Archivos MP3"));
-        int result = openFileChooser.showOpenDialog(null);
-        if(result == JFileChooser.APPROVE_OPTION){
-            songFile = openFileChooser.getSelectedFile();
+         openFileChooser.setFileFilter(new FileTypeFilter(".mp3", "Solo Archivos MP3"));
+    int result = openFileChooser.showOpenDialog(null);
+    
+    if (result == JFileChooser.APPROVE_OPTION) {
+        File selectedFile = openFileChooser.getSelectedFile();
+        
+        if (isMP3File(selectedFile)) {
+            songFile = selectedFile;
             player.addToPlayList(songFile);
             player.skipForward();
             currentDirectory = songFile.getAbsolutePath();
             player.play();
             songNameDisplay.setText("" + songFile.getName());
-        }  
+        } else {
+            // Lanzar una excepción si el archivo no es de tipo .mp3
+            throw new IllegalArgumentException("Solo se permiten archivos MP3");
+        }
+    }
     }//GEN-LAST:event_openBtnActionPerformed
 
+     private boolean isMP3File(File file) {
+    String fileName = file.getName();
+    int dotIndex = fileName.lastIndexOf('.');
+    
+    if (dotIndex != -1 && dotIndex < fileName.length() - 1) {
+        String fileExtension = fileName.substring(dotIndex + 1).toLowerCase();
+        return fileExtension.equals("mp3");
+    }
+    
+    return false;
+}
+    
     /**
      * @param args the command line arguments
      */
