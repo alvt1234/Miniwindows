@@ -35,7 +35,6 @@ private static Timer timer;
     public os() {
         initComponents();
         jProgressBar1.setVisible(false);
-   
          d= GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
          d.setFullScreenWindow(this);
          jLabel3.setText(username);

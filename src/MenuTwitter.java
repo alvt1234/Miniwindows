@@ -225,12 +225,16 @@ public class MenuTwitter extends javax.swing.JFrame {
         botonesblack();
         btexplorar.setForeground(new Color(0, 153, 255));
         btexplorar.setIcon(new ImageIcon(lupaA));
+        buscarhashtag hash=new buscarhashtag();
+        crearpaneles(hash);
     }//GEN-LAST:event_btexplorarActionPerformed
 
     private void btnotificacionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnotificacionActionPerformed
         botonesblack();
         btnotificacion.setForeground(new Color(0, 153, 255));
         btnotificacion.setIcon(new ImageIcon(campanaA));
+        Interacciones intera=new Interacciones();
+        crearpaneles(intera);
     }//GEN-LAST:event_btnotificacionActionPerformed
 
     private void btuserActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btuserActionPerformed
@@ -248,7 +252,7 @@ public class MenuTwitter extends javax.swing.JFrame {
             registro.readBoolean();
             
             if(usuario.equals(users.getUserlog())){
-             Perfil perfil=new Perfil(name,genero,edad, fecha);
+             Perfil perfil=new Perfil(this,name,genero,edad, fecha);
              crearpaneles(perfil);
             }
          }
@@ -343,7 +347,7 @@ public class MenuTwitter extends javax.swing.JFrame {
 }
 
     public boolean buscarparaelperfil(String user) throws IOException{
-        
+        System.out.println("entra al buscar");
         try (RandomAccessFile registro = new RandomAccessFile("Usertwit/user.twc", "rw")) {
         while (registro.getFilePointer() < registro.length()) {
             String nombre=registro.readUTF();
@@ -353,9 +357,10 @@ public class MenuTwitter extends javax.swing.JFrame {
             int edad=registro.readInt();
             String date=registro.readUTF();
             registro.readBoolean();
-
+            System.out.println("antes del if");
             if(user.equals(usuario)){
-                System.out.println("nombre: "+nombre);
+                System.out.println("entra al if");
+                System.out.println("nombre: "+nombre+" user "+user);
                 Perfilusuarios perfil=new Perfilusuarios(nombre, gene, edad, usuario, date);
                 crearpaneles(perfil);
                 txtbuscar.setText("Buscar");

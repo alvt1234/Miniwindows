@@ -1,5 +1,9 @@
 
+import java.awt.Color;
 import java.awt.Image;
+import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.text.SimpleDateFormat;
@@ -8,7 +12,10 @@ import java.util.Date;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollBar;
 
 
@@ -19,20 +26,27 @@ import javax.swing.JScrollBar;
 public class Perfil extends javax.swing.JPanel {
 
     private RandomAccessFile siguiendo,seguidores,cantseguidores,cantsiguiendo;
+    LoginTwitter login=new LoginTwitter();
     LogicaTwitter logica=new LogicaTwitter();
     UsersTwit userstwit=new UsersTwit();
+    Foto foto=new Foto(login);
     Buscarusuarios buscar=new Buscarusuarios(userstwit);
-    private String name,use,fec;
+    private JList<String> listaSugerencias = new JList<>();
+     private JPopupMenu popupSugerencias;
+    private String name,use,fec,nombre;
     private char ge;
     private int age,contar=0;
+    private MenuTwitter menu;
     //private RandomAccessFile twits;
     private ArrayList<String[]> twits;
-    public Perfil(String nombre,char genero,int edad,String fecha) {
+    public Perfil(MenuTwitter menu, String nombre,char genero,int edad,String fecha) {
         initComponents();
         this.name=nombre;
         this.ge=genero;
         this.age=edad;
         this.fec=fecha;
+        this.menu=menu;
+        popupSugerencias=new JPopupMenu();
         lbusuario.setText("@"+userstwit.getUserlog());
         lbname1.setText(name);
         lbgenero.setText("Genero "+ge);
@@ -43,6 +57,13 @@ public class Perfil extends javax.swing.JPanel {
         cantsiguiendo=new RandomAccessFile("Usertwit/"+userstwit.getUserlog()+"/cantsiguiendo.xd", "rw");
         lbseguidores1.setText(getseguidores()+" Seguidores");
         lbsiguiendo.setText(getsiguiendo()+" Siguiendo");
+        ImageIcon icono = foto.seticon(userstwit.getUserlog(), foto.getRutaImagen(), null,155,155);
+        if(icono==null){
+        lbfoto.setIcon(icono);
+        }else{
+            lbfoto.setIcon(userstwit.cargarFotoPerfil(userstwit.getUserlog(),150,150));
+        }
+            
         subirtweets();
         }catch(IOException e){
             System.out.println("No se pudo subir los tweets"); 
@@ -102,6 +123,7 @@ private void subirtweets() throws IOException {
         barra.setValue(barra.getMaximum());
     }
 }
+   
   
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -128,10 +150,7 @@ private void subirtweets() throws IOException {
 
         jPanel1.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
         add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
-
-        lbfoto.setText("Foto");
-        lbfoto.setOpaque(true);
-        add(lbfoto, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 50, 150, 140));
+        add(lbfoto, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 50, 150, 150));
 
         lbusuario.setFont(new java.awt.Font("Arial Black", 0, 18)); // NOI18N
         lbusuario.setText("Usuario");
@@ -158,6 +177,11 @@ private void subirtweets() throws IOException {
 
         lbsiguiendo.setFont(new java.awt.Font("Arial", 0, 14)); // NOI18N
         lbsiguiendo.setText("0 Siguiendo");
+        lbsiguiendo.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                lbsiguiendoMouseClicked(evt);
+            }
+        });
         add(lbsiguiendo, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 220, 90, 30));
 
         lbseguidores.setFont(new java.awt.Font("Arial", 0, 14)); // NOI18N
@@ -200,21 +224,81 @@ private void subirtweets() throws IOException {
     }// </editor-fold>//GEN-END:initComponents
 
     private void lbseguidoresMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lbseguidoresMouseClicked
-       /* try{
-        int opcion=JOptionPane.showInternalConfirmDialog(null, "Esta segura de desactivar su cuenta? ");
+        try{
+        int opcion=JOptionPane.showInternalConfirmDialog(null, "Esta seguro de desactivar su cuenta? ");
          if (opcion == JOptionPane.YES_OPTION) {
          JOptionPane.showMessageDialog(null, "Su cuenta ha sido desactivada");
              userstwit.desaccuenta();
-             LoginTwitter login=new LoginTwitter();
-        login.setVisible(true);
+             login.setVisible(true);
+             menu.dispose();
         } else if (opcion == JOptionPane.NO_OPTION || opcion == JOptionPane.CANCEL_OPTION || opcion == JOptionPane.CLOSED_OPTION) {
              System.out.println("no cerro xd");
         } 
         
         }catch(IOException e){
-            
-        }*/
+            System.out.println("no se desactivo");
+        }
     }//GEN-LAST:event_lbseguidoresMouseClicked
+
+    private void lbsiguiendoMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lbsiguiendoMouseClicked
+      contar++;
+        try{
+            if(contar==1)
+            mostrarVentanaSugerencias();
+            else{
+            ocultarVentanaSugerencias();
+              contar=0;
+            }
+      }catch(IOException e){
+          System.out.println("No se pudo mostrar la ventana");
+      }
+    }//GEN-LAST:event_lbsiguiendoMouseClicked
+private void mostrarVentanaSugerencias() throws IOException{
+    ArrayList<String> sugerencias = buscar.cargartwitseg();
+   
+    listaSugerencias.setListData(sugerencias.toArray(new String[0]));
+    
+    popupSugerencias.removeAll();
+   
+    // Asociar el menú emergente al componente de texto
+       for (String sugerencia : sugerencias){
+        System.out.println("datos1"+sugerencias);
+        JMenuItem menuItem = new JMenuItem(sugerencia);
+        menuItem.setBackground(Color.WHITE);
+           System.out.println("despues del menu item");
+        listaSugerencias.addListSelectionListener(e -> {
+            System.out.println("en el addlist");
+             if (!e.getValueIsAdjusting()) {  
+                 System.out.println("despues del if en click");
+            nombre=listaSugerencias.getSelectedValue();
+            try{
+            menu.buscarparaelperfil(nombre);
+            }catch(IOException ex){
+                System.out.println("no se pudo cargar el perfil");
+            }
+            }
+        });
+        
+        popupSugerencias.add(menuItem);
+    }
+   // popupSugerencias.setInvoker(txttexto);
+
+
+    Point posicion = lbsiguiendo.getLocationOnScreen();
+    if (posicion != null) {
+        int x = posicion.x;
+        int y = posicion.y + lbsiguiendo.getHeight() ; // Ajusta la posición vertical
+
+        popupSugerencias.show(lbsiguiendo, 35, 23);
+        lbsiguiendo.requestFocusInWindow(); // Asegurar que el componente mantenga el foco
+    }
+}
+private void ocultarVentanaSugerencias() {
+    popupSugerencias.setVisible(false);
+    lbsiguiendo.requestFocusInWindow(); // Asegurar que el editor pane mantenga el foco
+}
+
+
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

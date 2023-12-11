@@ -1,11 +1,19 @@
 
+import java.awt.Color;
+import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
+import javax.swing.JList;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollBar;
 
 
@@ -15,10 +23,14 @@ import javax.swing.JScrollBar;
  */
 public class Perfilusuarios extends javax.swing.JPanel {
 
+    
     private String name,use,fec,estado="Seguir";
     private char ge;
     private int age,contar=0;
     private RandomAccessFile siguiendo,seguidores,tweets;
+    
+    LoginTwitter login=new LoginTwitter();
+    Foto foto=new Foto(login);
     UsersTwit users=new UsersTwit();
      private ArrayList<String[]> twits;
     Buscarusuarios buscar=new Buscarusuarios(users);
@@ -44,7 +56,12 @@ public class Perfilusuarios extends javax.swing.JPanel {
             lbsiguiendo.setText(buscar.getsiguiendonames()+" Siguiendo");
             lbseguidores.setText(buscar.getseguidores()+" Seguidores");
             System.out.println("Texto boton en perfil: "+buscar.textoboton(userseleccionado));
-            
+            ImageIcon icono = foto.seticon(use, foto.getRutaImagen(), null,160,160);
+        if(icono==null){
+        lbfoto.setIcon(icono);
+        }else{
+            lbfoto.setIcon(users.cargarFotoPerfil(use,145,145));
+        }
         if(buscar.textoboton(userseleccionado)){
             contar++;
           btseguir.setText("Siguiendo");
@@ -59,7 +76,6 @@ public class Perfilusuarios extends javax.swing.JPanel {
         
     }
  
-
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -93,8 +109,7 @@ public class Perfilusuarios extends javax.swing.JPanel {
         jPanel1.add(lbuserlog, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
 
         lbfoto.setText("Foto");
-        lbfoto.setOpaque(true);
-        jPanel1.add(lbfoto, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 50, 150, 140));
+        jPanel1.add(lbfoto, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 50, 150, 150));
 
         lbname2.setFont(new java.awt.Font("Arial Black", 0, 18)); // NOI18N
         lbname2.setText("Tweets");
@@ -176,17 +191,18 @@ public class Perfilusuarios extends javax.swing.JPanel {
             if(contar==1){
             estado="Siguiendo";
              btseguir.setText("Siguiendo");
-           //  buscar.writesiguiendonames(use);
             buscar.guardarsiguiendo(use,estado);
             lbseguidores.setText(buscar.getseguidores()+" Seguidores");
             }else if(contar==2){
             int opcion=JOptionPane.showInternalConfirmDialog(null, "Esta seguro que desea dejar de seguir\n a este usuario?");
-        if (opcion == JOptionPane.YES_OPTION) {
+            if (opcion == JOptionPane.YES_OPTION) {
             contar=0;
             estado ="Seguir";
             btseguir.setText("Seguir");
             buscar.dejarDeSeguir(users.getUserlog(), use);
+            lbseguidores.setText(buscar.getseguidores()+" Seguidores");
         } else if (opcion == JOptionPane.NO_OPTION || opcion == JOptionPane.CANCEL_OPTION || opcion == JOptionPane.CLOSED_OPTION) {
+            contar=1;
         } 
         }
         

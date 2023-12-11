@@ -2,6 +2,7 @@
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 
 
@@ -55,7 +56,7 @@ public class Buscarusuarios {
 
     return resultados;
 }
- //funcion para contar los seguidores (NO FUNCIONA)
+ //funcion para contar los seguidores 
     private void initCodeseguidores() throws IOException {
         if (cantseguidores.length() == 0) {
             cantseguidores.writeInt(0);
@@ -171,10 +172,10 @@ public class Buscarusuarios {
    //para disminuir los seguidores
      public void dejarDeSeguir(String usuario, String seguidor) {
         try {
-            decrementarSeguidor("Usertwit/" + usuario + "/following.twc");
+            decrementarSeguidor("Usertwit/" + usuario + "/cantsiguiendo.xd");
+            decrementarSeguidor("Usertwit/" + seguidor + "/cantseguidores.xd");
             eliminarEntrada("Usertwit/" + usuario + "/following.twc", seguidor);
-
-            decrementarSeguidor("Usertwit/" + seguidor + "/followers.twc");
+            
             eliminarEntrada("Usertwit/" + seguidor + "/followers.twc", usuario);
         } catch (IOException e) {
             e.printStackTrace();
@@ -296,9 +297,76 @@ public ArrayList<String[]> cargarTwits(String user) throws IOException {
     public void setNombreselected(String nombreselected) {
         Buscarusuarios.nombreselected = nombreselected;
     }
-
-   
     
+ public ArrayList<String> buscarmenciones(String mencion)throws IOException{
+     ArrayList<String> menciones=new ArrayList<>();
+     try (RandomAccessFile registro = new RandomAccessFile("Usertwit/user.twc", "rw")) {
+        while (registro.getFilePointer() < registro.length()) {
+            registro.readUTF();
+            registro.readChar();
+            String usuario = registro.readUTF();
+            registro.readUTF(); 
+            registro.readInt();
+            registro.readUTF();
+            registro.readBoolean();
+
+            System.out.println("antes del if de buscar");
+            if (mencion.contains("@"+usuario)) {
+                menciones.add("@"+usuario);
+                System.out.println("menciones: "+menciones);
+            }
+        }
+     }
+     return menciones;
+ }public ArrayList<String[]> Twitspersonasmencion(String user) throws IOException {
+    ArrayList<String[]> mensajes = new ArrayList<>();
+    tweets = new RandomAccessFile("Usertwit/" + user + "/twits.twc", "rw");
+    tweets.seek(0);
+
+    while (tweets.getFilePointer() < tweets.length()) {
+        String[] temp = new String[3];
+        temp[0] = tweets.readUTF(); // usuario
+        temp[1] = tweets.readUTF(); // texto
+        temp[2] = tweets.readLong() + "";
+
+        if (temp[1].contains("@" + users.getUserlog())) {
+            mensajes.add(temp);
+        }
+    }
+
+    return mensajes.isEmpty() ? null : mensajes;
+}
+
+public ArrayList<String[]> cargarTwitsmencion(String user) throws IOException {
+    ArrayList<String[]> twts = new ArrayList<>();
+
+    if (Twitspersonasmencion(user) != null ) {
+        twts.addAll(Twitspersonasmencion(user));
+    }
+
+    return twts;
+}
+
+public ArrayList<String> buscarUsers() throws IOException {
+    ArrayList<String> users = new ArrayList<>();
+
+    try (RandomAccessFile registro = new RandomAccessFile("Usertwit/user.twc", "rw")) {
+        while (registro.getFilePointer() < registro.length()) {
+            registro.readUTF();
+            registro.readChar();
+            String usuario = registro.readUTF();
+            registro.readUTF(); 
+            registro.readInt();
+            registro.readUTF();
+            registro.readBoolean();
+            if(usuario!=null)
+              users.add(usuario);
+            
+        }
+    }
+
+    return users;
+}
  
 
 }

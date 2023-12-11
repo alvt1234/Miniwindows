@@ -9,7 +9,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 public class Foto extends javax.swing.JFrame {
 
     byte[] image;
-    String imagepath = "";
+    static String imagepath = "",rutaImagen;
     ImageIcon myimage;
     UsersTwit usertwit=new UsersTwit();
     private LoginTwitter login;
@@ -22,16 +22,21 @@ public class Foto extends javax.swing.JFrame {
         this.setLocationRelativeTo(null);
         this.login = login;
     }
-
-    public ImageIcon seticon(String m, byte[] image) {
-        if (m != null) {
-            myimage = new ImageIcon(m);
-        }
-        Image img1 = myimage.getImage();
-        Image img2 = img1.getScaledInstance(lbimage.getWidth(), lbimage.getHeight(), Image.SCALE_SMOOTH);
-        ImageIcon i = new ImageIcon(img2);
-        return i;
+       public ImageIcon seticon(String user, String m, byte[] image, int width, int height) {
+    if (m != null) {
+        myimage = new ImageIcon(m);
+    } else {
+        myimage = new ImageIcon(getClass().getResource("/imagentwitter/usuario.jpg"));
     }
+    
+    Image img = myimage.getImage();
+    img = img.getScaledInstance(width, height, Image.SCALE_SMOOTH);
+    ImageIcon scaledIcon = new ImageIcon(img);
+
+    return scaledIcon;
+}
+
+    
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -120,24 +125,33 @@ public class Foto extends javax.swing.JFrame {
     }//GEN-LAST:event_btomitirActionPerformed
 
     private void btagregarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btagregarActionPerformed
-        try{
+         try {
         JFileChooser file = new JFileChooser();
-        file.setCurrentDirectory(new File("user.dir"));
+        file.setCurrentDirectory(new File(System.getProperty("user.dir")));
         FileNameExtensionFilter filter = new FileNameExtensionFilter("All Pic", "png", "jpg", "jpeg", "gif");
         file.addChoosableFileFilter(filter);
         int a = file.showSaveDialog(null);
+
         if (a == JFileChooser.APPROVE_OPTION) {
             File f = file.getSelectedFile();
-            String p = f.getAbsolutePath();
-            lbimage.setIcon(seticon(p, null));
-            System.out.println("user en foto: "+usertwit.getUserlog());
-            usertwit.fotoperfil(usertwit.getUserlog(), f);
-            //logica.guardarFotoDePerfil(f);
+            rutaImagen = f.getAbsolutePath();
+
+            // Obtener la instancia de UsuarioTwitter (asegúrate de haber inicializado usertwit correctamente)
+
+            // Guardar la foto de perfil
+            usertwit.guardarFotoPerfil(rutaImagen);
+
+            // Mostrar la imagen en el JLabel
+            lbimage.setIcon(seticon(usertwit.getUserlog(),rutaImagen, null,250,250));
         }
-        }catch(IOException e){
-            System.out.println("Error al cargar la imagen");
-        }
+    } catch (IOException e) {
+        System.out.println("Error al cargar la imagen");
+    }
     }//GEN-LAST:event_btagregarActionPerformed
+
+    public String getRutaImagen() {
+        return rutaImagen;
+    }
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

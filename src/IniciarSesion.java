@@ -197,13 +197,15 @@ public class IniciarSesion extends javax.swing.JFrame {
         }else{
             UsersTwit usertwit=new UsersTwit();
           try{  
-       if(usertwit.iniciosesion(user, contra)){ 
+       if(usertwit.iniciosesion(user, contra) ){ 
        MenuTwitter menu=new MenuTwitter();
        menu.setVisible(true);
        dispose();
        login.dispose();
+          
         }
           }catch(IOException e){
+              e.printStackTrace();
               JOptionPane.showMessageDialog(null, "Usuario Inexistente");
           }
         }

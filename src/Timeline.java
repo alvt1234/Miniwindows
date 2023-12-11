@@ -8,8 +8,10 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
 import javax.swing.JList;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
@@ -25,6 +27,8 @@ import javax.swing.JScrollBar;
 public class Timeline extends javax.swing.JPanel {
 
     private JList<String> listaSugerencias = new JList<>();
+    LoginTwitter login=new LoginTwitter();
+    Foto foto=new Foto(login);
     UsersTwit user=new UsersTwit();
     LogicaTwitter logica;
     Buscarusuarios buscar=new Buscarusuarios(user);
@@ -38,8 +42,14 @@ public class Timeline extends javax.swing.JPanel {
        try{
        this.logica=logica;
        this.twits=logica.cargarTwits();
-       subirtweets();
        cargartwitssiguiendo();
+       subirtweets();
+       ImageIcon icono = foto.seticon(user.getUserlog(), foto.getRutaImagen(), null,50,50);
+        if(icono==null){
+        lbfoto.setIcon(icono);
+        }else{
+            lbfoto.setIcon(user.cargarFotoPerfil(user.getUserlog(),50,50));
+        }
        }catch(IOException e){
            e.printStackTrace();
             System.out.println("error en cargar ");
@@ -54,7 +64,7 @@ public class Timeline extends javax.swing.JPanel {
         panel = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         txttexto = new javax.swing.JEditorPane();
-        jLabel2 = new javax.swing.JLabel();
+        lbfoto = new javax.swing.JLabel();
         jButton1 = new javax.swing.JButton();
         jSeparator1 = new javax.swing.JSeparator();
         jLabel1 = new javax.swing.JLabel();
@@ -91,8 +101,7 @@ public class Timeline extends javax.swing.JPanel {
         });
         jScrollPane1.setViewportView(txttexto);
 
-        jLabel2.setText("Foto");
-        jLabel2.setOpaque(true);
+        lbfoto.setText("Foto");
 
         jButton1.setBackground(new java.awt.Color(153, 204, 255));
         jButton1.setFont(new java.awt.Font("Arial Black", 0, 14)); // NOI18N
@@ -141,7 +150,7 @@ public class Timeline extends javax.swing.JPanel {
                 .addGap(0, 0, Short.MAX_VALUE))
             .addGroup(layout.createSequentialGroup()
                 .addGap(12, 12, 12)
-                .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(lbfoto, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(layout.createSequentialGroup()
@@ -162,7 +171,7 @@ public class Timeline extends javax.swing.JPanel {
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(panel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(24, 24, 24)
-                        .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 46, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(lbfoto, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(24, 24, 24)
                         .addComponent(jLabel1)
@@ -182,9 +191,15 @@ public class Timeline extends javax.swing.JPanel {
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
       String texto=txttexto.getText();
+      if(texto.length()<=140){
       if(!txttexto.getText().isEmpty()){
         try{
         logica.guardarTwit(texto);
+        buscar.buscarmenciones(texto);
+        if(!txttexto.getText().isEmpty()){
+        List<String> hashtags = logica.extraerHashtags(texto);
+            logica.guardarHashtagsEnArchivo(hashtags);
+        }
         txttexto.setText("");
         subirtweets();
         this.revalidate();
@@ -197,6 +212,8 @@ public class Timeline extends javax.swing.JPanel {
       }else{
           JOptionPane.showMessageDialog(null, "Tweet vacio");
       }
+      }else
+          JOptionPane.showMessageDialog(null, "Mensaje muy largo");
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void txttextoKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txttextoKeyTyped
@@ -207,11 +224,13 @@ public class Timeline extends javax.swing.JPanel {
     try {
         if (tecla == '@') {
             mostrarVentanaSugerencias(texto);
+            
             txttexto.setForeground(Color.blue);
         } else if (Character.isWhitespace(tecla)) {
             txttexto.setForeground(new Color(102, 102, 102));
             ocultarVentanaSugerencias();
         }
+       
     } catch (IOException e) {
         System.out.println("no @");
     }
@@ -261,10 +280,11 @@ private void ocultarVentanaSugerencias() {
     popupSugerencias.setVisible(false);
     txttexto.requestFocusInWindow(); // Asegurar que el editor pane mantenga el foco
 }
-
+//sugerencias
 private ArrayList<String> obtenerSugerencias(String mencion) throws IOException {
       
         ArrayList<String> resultados = buscar.buscarUsuarios(mencion);
+        
         
         ArrayList<String> sugerencias = new ArrayList<>();
         System.out.println("suge"+sugerencias);
@@ -375,10 +395,10 @@ private void cargartwitssiguiendo() throws IOException {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSeparator jSeparator3;
+    private javax.swing.JLabel lbfoto;
     private javax.swing.JPanel panel;
     private javax.swing.JPanel paneltweets;
     private javax.swing.JScrollPane scrolltweets;
